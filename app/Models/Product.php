@@ -27,6 +27,11 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function billOfMaterials()
+    {
+        return $this->hasMany(BillOfMaterial::class);
+    }
     
     public function stockMovements()
     {

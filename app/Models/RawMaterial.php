@@ -23,6 +23,11 @@ class RawMaterial extends Model
         'price' => 'decimal:2',
     ];
 
+    public function billOfMaterials()
+    {
+        return $this->hasMany(BillOfMaterial::class);
+    }
+
     public function stockMovements()
     {
         return $this->morphMany(StockMovement::class, 'stockable');
