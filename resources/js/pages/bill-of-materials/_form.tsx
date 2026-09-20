@@ -267,8 +267,8 @@ export default function BillOfMaterialForm({
                                                     <td className="px-4 py-3 align-top">
                                                         <div className="flex items-center gap-2">
                                                             <Input
-                                                                min="0.001"
-                                                                step="0.001"
+                                                                min="0.0001"
+                                                                step="0.0001"
                                                                 type="number"
                                                                 value={
                                                                     item.quantity_needed

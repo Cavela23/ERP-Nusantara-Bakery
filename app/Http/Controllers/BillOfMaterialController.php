@@ -41,7 +41,7 @@ class BillOfMaterialController extends Controller
             'product_id' => ['required', 'exists:products,id'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.raw_material_id' => ['required', 'exists:raw_materials,id', 'distinct'],
-            'items.*.quantity_needed' => ['required', 'numeric', 'min:0.001'],
+            'items.*.quantity_needed' => ['required', 'numeric', 'min:0.0001'],
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -71,7 +71,7 @@ class BillOfMaterialController extends Controller
         $validated = $request->validate([
             'items' => ['required', 'array', 'min:1'],
             'items.*.raw_material_id' => ['required', 'exists:raw_materials,id', 'distinct'],
-            'items.*.quantity_needed' => ['required', 'numeric', 'min:0.001'],
+            'items.*.quantity_needed' => ['required', 'numeric', 'min:0.0001'],
         ]);
 
         DB::transaction(function () use ($validated, $product) {
