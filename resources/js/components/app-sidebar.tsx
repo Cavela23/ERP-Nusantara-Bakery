@@ -76,6 +76,12 @@ const mainNavItems: NavItem[] = [
         title: 'Production',
         href: '#',
         icon: Factory,
+        items: [
+            {
+                title: 'Bill of Materials',
+                href: '/bill-of-materials',
+            }
+        ]
     },
     {
         title: 'Distribution',
