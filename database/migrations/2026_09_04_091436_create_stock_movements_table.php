@@ -14,6 +14,13 @@ return new class extends Migration
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->morphs('stockable');
+            $table->string('type');
+            $table->decimal('quantity', 12, 3);
+            $table->string('reference_type')->nullable();
+            $table->unsignedBigInteger('reference_id')->nullable();
+            $table->text('notes')->nullable();
+            $table->foreignId('created_by')->constrained('users');
         });
     }
 

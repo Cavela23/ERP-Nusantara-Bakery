@@ -27,4 +27,17 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+    
+    public function stockMovements()
+    {
+        return $this->morphMany(StockMovement::class, 'stockable');
+    }
+
+    public function getCurrentStockAttribute()
+    {
+        $in = $this->stockMovements()->where('type', 'in')->sum('quantity');
+        $out = $this->stockMovements()->where('type', 'out')->sum('quantity');
+        
+        return $in - $out;
+    }
 }

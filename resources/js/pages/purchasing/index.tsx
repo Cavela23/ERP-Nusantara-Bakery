@@ -2,7 +2,14 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { create, destroy, edit, index } from '@/routes/purchasing';
+import {
+    create,
+    destroy,
+    edit,
+    index,
+    markAsOrdered,
+    receive,
+} from '@/routes/purchasing';
 
 type Supplier = { id: number; name: string };
 type PurchaseOrder = {
@@ -80,6 +87,38 @@ export default function PurchasingIndex({
         });
     }
 
+    function handleMarkAsOrdered(purchaseOrder: PurchaseOrder) {
+        if (
+            !window.confirm(
+                `Tandai PO "${purchaseOrder.po_number}" sebagai dipesan?`,
+            )
+        ) {
+            return;
+        }
+
+        router.post(
+            markAsOrdered.url(purchaseOrder.id),
+            {},
+            { preserveScroll: true },
+        );
+    }
+
+    function handleReceive(purchaseOrder: PurchaseOrder) {
+        if (
+            !window.confirm(
+                `Konfirmasi barang untuk PO "${purchaseOrder.po_number}" sudah diterima?`,
+            )
+        ) {
+            return;
+        }
+
+        router.post(
+            receive.url(purchaseOrder.id),
+            {},
+            { preserveScroll: true },
+        );
+    }
+
     return (
         <>
             <Head title="Purchase Orders" />
@@ -103,14 +142,26 @@ export default function PurchasingIndex({
                 <Card className="overflow-hidden border-sidebar-border/70 py-0 dark:border-sidebar-border">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="border-b border-sidebar-border/70 bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground dark:border-sidebar-border">
+                            <thead className="border-b border-sidebar-border/70 bg-muted/40 text-xs tracking-wide text-muted-foreground uppercase dark:border-sidebar-border">
                                 <tr>
-                                    <th className="px-6 py-4 font-medium">No. PO</th>
-                                    <th className="px-6 py-4 font-medium">Supplier</th>
-                                    <th className="px-6 py-4 font-medium">Tanggal</th>
-                                    <th className="px-6 py-4 font-medium">Status</th>
-                                    <th className="px-6 py-4 text-right font-medium">Total</th>
-                                    <th className="px-6 py-4 text-right font-medium">Aksi</th>
+                                    <th className="px-6 py-4 font-medium">
+                                        No. PO
+                                    </th>
+                                    <th className="px-6 py-4 font-medium">
+                                        Supplier
+                                    </th>
+                                    <th className="px-6 py-4 font-medium">
+                                        Tanggal
+                                    </th>
+                                    <th className="px-6 py-4 font-medium">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-4 text-right font-medium">
+                                        Total
+                                    </th>
+                                    <th className="px-6 py-4 text-right font-medium">
+                                        Aksi
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sidebar-border/70 dark:divide-sidebar-border">
@@ -138,34 +189,76 @@ export default function PurchasingIndex({
                                                     {purchaseOrder.po_number}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    {purchaseOrder.supplier.name}
+                                                    {
+                                                        purchaseOrder.supplier
+                                                            .name
+                                                    }
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {dateFormatter.format(
-                                                        new Date(purchaseOrder.order_date),
+                                                        new Date(
+                                                            purchaseOrder.order_date,
+                                                        ),
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <Badge
-                                                        className={statusBadge.className}
-                                                        variant={statusBadge.variant}
+                                                        className={
+                                                            statusBadge.className
+                                                        }
+                                                        variant={
+                                                            statusBadge.variant
+                                                        }
                                                     >
                                                         {purchaseOrder.status}
                                                     </Badge>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     {currencyFormatter.format(
-                                                        Number(purchaseOrder.total_amount),
+                                                        Number(
+                                                            purchaseOrder.total_amount,
+                                                        ),
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex justify-end gap-2">
-                                                        {purchaseOrder.status === 'received' ? (
+                                                        {purchaseOrder.status ===
+                                                        'received' ? (
                                                             <span className="px-3 py-2 text-xs text-muted-foreground">
                                                                 Terkunci
                                                             </span>
                                                         ) : (
                                                             <>
+                                                                {purchaseOrder.status ===
+                                                                    'draft' && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="secondary"
+                                                                        onClick={() =>
+                                                                            handleMarkAsOrdered(
+                                                                                purchaseOrder,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Tandai
+                                                                        Dipesan
+                                                                    </Button>
+                                                                )}
+                                                                {purchaseOrder.status ===
+                                                                    'ordered' && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="default"
+                                                                        onClick={() =>
+                                                                            handleReceive(
+                                                                                purchaseOrder,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Terima
+                                                                        Barang
+                                                                    </Button>
+                                                                )}
                                                                 <Button
                                                                     asChild
                                                                     size="sm"

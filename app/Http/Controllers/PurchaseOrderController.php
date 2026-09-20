@@ -83,6 +83,48 @@ class PurchaseOrderController extends Controller
         return to_route('purchasing.index');
     }
 
+    public function markAsOrdered(PurchaseOrder $purchaseOrder): RedirectResponse
+    {
+        if ($purchaseOrder->status !== 'draft') {
+            abort(400, 'Hanya PO berstatus draft yang bisa ditandai sebagai dipesan.');
+        }
+
+        $purchaseOrder->update(['status' => 'ordered']);
+
+        return to_route('purchasing.index')->with(
+            'success',
+            'PO telah ditandai sebagai dipesan.',
+        );
+    }
+
+    public function receive(PurchaseOrder $purchaseOrder): RedirectResponse
+    {
+        if ($purchaseOrder->status !== 'ordered') {
+            abort(400, 'PO harus berstatus ordered untuk bisa diterima.');
+        }
+
+        DB::transaction(function () use ($purchaseOrder) {
+            $purchaseOrder->load('items.rawMaterial');
+
+            foreach ($purchaseOrder->items as $item) {
+                $item->rawMaterial->stockMovements()->create([
+                    'type' => 'in',
+                    'quantity' => $item->quantity,
+                    'reference_type' => 'purchase_order',
+                    'reference_id' => $purchaseOrder->id,
+                    'created_by' => auth()->id(),
+                ]);
+            }
+
+            $purchaseOrder->update(['status' => 'received']);
+        });
+
+        return to_route('purchasing.index')->with(
+            'success',
+            'Barang berhasil diterima dan stok telah diperbarui.',
+        );
+    }
+
     private function generatePoNumber(): string
     {
         $date = now()->format('Ymd');

@@ -69,7 +69,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Inventory',
-        href: '#',
+        href: '/inventory',
         icon: Package,
     },
     {

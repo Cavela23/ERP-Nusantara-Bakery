@@ -22,4 +22,17 @@ class RawMaterial extends Model
         'stock_min' => 'decimal:3',
         'price' => 'decimal:2',
     ];
+
+    public function stockMovements()
+    {
+        return $this->morphMany(StockMovement::class, 'stockable');
+    }
+
+    public function getCurrentStockAttribute()
+    {
+        $in = $this->stockMovements()->where('type', 'in')->sum('quantity');
+        $out = $this->stockMovements()->where('type', 'out')->sum('quantity');
+        
+        return $in - $out;
+    }
 }
