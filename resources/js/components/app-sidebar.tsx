@@ -80,6 +80,10 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Bill of Materials',
                 href: '/bill-of-materials',
+            },
+            {
+                title: 'Production Orders',
+                href: '/production-orders',
             }
         ]
     },

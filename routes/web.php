@@ -8,6 +8,7 @@ use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\RawMaterialController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\BillOfMaterialController;
+use App\Http\Controllers\ProductionOrderController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->parameters(['bill-of-materials' => 'product']);
     Route::get('inventory', [StockMovementController::class, 'index'])->name('inventory.index');
     Route::get('inventory/history', [StockMovementController::class, 'history'])->name('inventory.history');
+    Route::resource('production-orders', ProductionOrderController::class)->except(['show']);
 });
 
 require __DIR__.'/settings.php';
