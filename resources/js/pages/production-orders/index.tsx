@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { create, index } from '@/routes/production-orders';
+import { create, index, show } from '@/routes/production-orders';
 
 type Product = {
 	id: number;
@@ -85,6 +85,7 @@ export default function ProductionOrderIndex({
 									<th className="px-6 py-4 font-medium">
 										Dicatat oleh
 									</th>
+									<th className="px-6 py-4 font-medium">Aksi</th>
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-sidebar-border/70 dark:divide-sidebar-border">
@@ -92,7 +93,7 @@ export default function ProductionOrderIndex({
 									<tr>
 										<td
 											className="px-6 py-12 text-center text-muted-foreground"
-											colSpan={5}
+																				colSpan={6}
 										>
 											Belum ada produksi yang dicatat.
 										</td>
@@ -124,6 +125,14 @@ export default function ProductionOrderIndex({
 											<td className="px-6 py-4">
 												{productionOrder.creator.name}
 											</td>
+													<td className="px-6 py-4">
+														<Link
+															className="text-sm font-medium text-primary hover:underline"
+															href={show(productionOrder.id)}
+														>
+															Detail
+														</Link>
+													</td>
 										</tr>
 									))
 								)}

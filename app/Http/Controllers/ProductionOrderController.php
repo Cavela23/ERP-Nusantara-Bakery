@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProductionOrder;
 use App\Models\Product;
+use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -136,9 +137,16 @@ class ProductionOrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(ProductionOrder $productionOrder): Response
     {
-        //
+        return Inertia::render('production-orders/show', [
+            'productionOrder' => $productionOrder->load('product', 'creator'),
+            'materialsUsed' => StockMovement::where('reference_type', 'production_order')
+                ->where('reference_id', $productionOrder->id)
+                ->where('type', 'out')
+                ->with('stockable')
+                ->get(),
+        ]);
     }
 
     /**
