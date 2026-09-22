@@ -42,6 +42,11 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
 	dateStyle: 'medium',
 });
 
+const quantityFormatter = new Intl.NumberFormat('id-ID', {
+	minimumFractionDigits: 0,
+	maximumFractionDigits: 3,
+});
+
 export default function ProductionOrderIndex({
 	productionOrders,
 }: ProductionOrderIndexProps) {
@@ -111,9 +116,9 @@ export default function ProductionOrderIndex({
 												{productionOrder.product.name}
 											</td>
 											<td className="px-6 py-4">
-												{Number(
-													productionOrder.quantity,
-												).toFixed(3)}
+												{quantityFormatter.format(
+													Number(productionOrder.quantity),
+												)}
 											</td>
 											<td className="px-6 py-4">
 												{dateFormatter.format(
