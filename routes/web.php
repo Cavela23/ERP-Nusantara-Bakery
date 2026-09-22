@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PurchaseOrderController;
@@ -17,6 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('products', ProductController::class) -> except(['show']);
     Route::resource('categories', CategoryController::class) -> except(['show']);
     Route::resource('suppliers', SuppliersController::class) -> except(['show']);
+    Route::resource('branches', BranchController::class)->except(['show']);
     Route::resource('purchasing', PurchaseOrderController::class)
         ->except(['show'])
         ->parameters(['purchasing' => 'purchaseOrder']);
