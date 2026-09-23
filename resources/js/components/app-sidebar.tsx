@@ -54,6 +54,10 @@ const mainNavItems: NavItem[] = [
                 title: 'Raw Materials',
                 href: '/raw-materials',
             },
+            {
+                title: 'Branches',
+                href: '/branches',
+            },
         ],
     },
     {
