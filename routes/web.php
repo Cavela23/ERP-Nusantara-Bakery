@@ -10,6 +10,7 @@ use App\Http\Controllers\RawMaterialController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\BillOfMaterialController;
 use App\Http\Controllers\ProductionOrderController;
+use App\Http\Controllers\DistributionController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -26,6 +27,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('purchasing.receive');
     Route::post('purchasing/{purchaseOrder}/mark-as-ordered', [PurchaseOrderController::class, 'markAsOrdered'])
         ->name('purchasing.mark-as-ordered');
+    Route::resource('distributions', DistributionController::class)->except(['show']);
+    Route::post('distributions/{distribution}/mark-as-shipped', [DistributionController::class, 'markAsShipped'])
+        ->name('distributions.mark-as-shipped');
+    Route::post('distributions/{distribution}/mark-as-received', [DistributionController::class, 'markAsReceived'])
+        ->name('distributions.mark-as-received');
     Route::resource('raw-materials', \App\Http\Controllers\RawMaterialController::class)
         ->except(['show'])
         ->parameters(['raw-materials' => 'rawMaterial']);
