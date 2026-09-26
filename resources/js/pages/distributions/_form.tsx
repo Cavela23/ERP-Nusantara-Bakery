@@ -84,10 +84,10 @@ export default function DistributionForm({
 			: [emptyItem()],
 	);
 	const form = useForm({
-		branch_id: '' as number | '',
-		distribution_date: '',
-		notes: '',
-		items: [emptyItem()],
+		branch_id: header.branch_id,
+		distribution_date: header.distribution_date,
+		notes: header.notes,
+		items,
 	});
 
 	const invalidStockProducts = products.filter((product) => {
