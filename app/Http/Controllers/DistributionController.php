@@ -89,14 +89,18 @@ class DistributionController extends Controller
         $distribution->load('items.product');
 
         $insufficientItems = [];
+        $requestedByProduct = $distribution->items->groupBy('product_id');
 
-        foreach ($distribution->items as $item) {
-            if ($item->product->current_stock < $item->quantity) {
+        foreach ($requestedByProduct as $items) {
+            $product = $items->first()->product;
+            $requestedQuantity = $items->sum('quantity');
+
+            if ($product->current_stock < $requestedQuantity) {
                 $insufficientItems[] = sprintf(
                     '%s (butuh %s, tersedia %s)',
-                    $item->product->name,
-                    $item->quantity,
-                    $item->product->current_stock,
+                    $product->name,
+                    $requestedQuantity,
+                    $product->current_stock,
                 );
             }
         }
@@ -160,24 +164,83 @@ class DistributionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Distribution $distribution): Response
     {
-        //
+        if ($distribution->status !== 'pending') {
+            abort(400, 'Hanya distribusi pending yang bisa diedit.');
+        }
+
+        $products = Product::all(['id', 'name', 'sku', 'unit'])
+            ->map(fn ($product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'sku' => $product->sku,
+                'unit' => $product->unit,
+                'current_stock' => $product->current_stock,
+            ]);
+
+        return Inertia::render('distributions/edit', [
+            'distribution' => $distribution->load('items'),
+            'branches' => Branch::all(['id', 'name']),
+            'products' => $products,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Distribution $distribution): RedirectResponse
     {
-        //
+        if ($distribution->status !== 'pending') {
+            abort(400, 'Hanya distribusi pending yang bisa diedit.');
+        }
+
+        $validated = $request->validate([
+            'branch_id' => ['required', 'exists:branches,id'],
+            'distribution_date' => ['required', 'date'],
+            'notes' => ['nullable', 'string'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'exists:products,id'],
+            'items.*.quantity' => ['required', 'numeric', 'min:0.001'],
+        ]);
+
+        DB::transaction(function () use ($distribution, $validated) {
+            $distribution->update([
+                'branch_id' => $validated['branch_id'],
+                'distribution_date' => $validated['distribution_date'],
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            $distribution->items()->delete();
+
+            foreach ($validated['items'] as $item) {
+                $distribution->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                ]);
+            }
+        });
+
+        return to_route('distributions.index')->with(
+            'success',
+            'Distribusi berhasil diperbarui.',
+        );
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Distribution $distribution): RedirectResponse
     {
-        //
+        if ($distribution->status !== 'pending') {
+            abort(400, 'Hanya distribusi pending yang bisa dihapus.');
+        }
+
+        $distribution->delete();
+
+        return to_route('distributions.index')->with(
+            'success',
+            'Distribusi berhasil dihapus.',
+        );
     }
 }
