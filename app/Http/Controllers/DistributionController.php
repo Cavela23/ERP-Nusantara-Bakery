@@ -86,9 +86,28 @@ class DistributionController extends Controller
             abort(400, 'Distribusi hanya bisa dikirim jika berstatus pending.');
         }
 
-        DB::transaction(function () use ($distribution) {
-            $distribution->load('items.product');
+        $distribution->load('items.product');
 
+        $insufficientItems = [];
+
+        foreach ($distribution->items as $item) {
+            if ($item->product->current_stock < $item->quantity) {
+                $insufficientItems[] = sprintf(
+                    '%s (butuh %s, tersedia %s)',
+                    $item->product->name,
+                    $item->quantity,
+                    $item->product->current_stock,
+                );
+            }
+        }
+
+        if (! empty($insufficientItems)) {
+            return redirect()->back()->withErrors([
+                'stock' => 'Stok produk tidak mencukupi: ' . implode(', ', $insufficientItems),
+            ]);
+        }
+
+        DB::transaction(function () use ($distribution) {
             foreach ($distribution->items as $item) {
                 $item->product->stockMovements()->create([
                     'type' => 'out',
