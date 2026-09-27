@@ -1,4 +1,15 @@
     import { Link } from '@inertiajs/react';
+    import {
+        Boxes,
+        ChartNoAxesCombined,
+        Factory,
+        FolderGit2,
+        LayoutGrid,
+        Package,
+        ShoppingCart,
+        Truck,
+        BookOpen,
+    } from 'lucide-react';
     import AppLogo from '@/components/app-logo';
     import { NavFooter } from '@/components/nav-footer';
     import { NavMain } from '@/components/nav-main';
@@ -12,18 +23,6 @@
         SidebarMenuButton,
         SidebarMenuItem,
     } from '@/components/ui/sidebar';
-    import {
-        Boxes,
-        ChartNoAxesCombined,
-        ClipboardList,
-        Factory,
-        LayoutGrid,
-        Package,
-        ShoppingCart,
-        Truck,
-        BookOpen, 
-        FolderGit2
-    } from 'lucide-react';
     import { dashboard } from '@/routes';
     import type { NavItem } from '@/types';
 
@@ -98,8 +97,14 @@
         },
         {
             title: 'POS',
-            href: '#',
+            href: '/sales',
             icon: ShoppingCart,
+            items: [
+                {
+                    title: 'Transaksi Penjualan',
+                    href: '/sales',
+                },
+            ],
         },
         {
             title: 'Reporting',
