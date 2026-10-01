@@ -11,7 +11,7 @@ import {
 } from '@/routes/distributions';
 
 type Branch = { id: number; name: string };
-type DistributionStatus = 'pending' | 'shipped' | 'received';
+export type DistributionStatus = 'pending' | 'shipped' | 'received';
 type Distribution = {
 	id: number;
 	distribution_number: string;
@@ -32,7 +32,7 @@ type PaginatedDistributions = {
 
 type DistributionsIndexProps = { distributions: PaginatedDistributions };
 
-function getStatusBadge(status: DistributionStatus) {
+export function getStatusBadge(status: DistributionStatus) {
 	switch (status) {
 		case 'pending':
 			return { variant: 'secondary' as const, className: '' };

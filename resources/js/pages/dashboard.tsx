@@ -12,6 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { dashboard } from '@/routes';
+import { getStatusBadge } from './distributions';
 
 type DashboardMetrics = {
     revenueToday: number;
@@ -53,8 +54,8 @@ type DashboardProps = {
     metrics: DashboardMetrics;
     bestsellingProducts: BestsellingProduct[];
     lowStockAlerts: StockAlert[];
-    recentProductionOrders: ProductionOrder[];
-    activeDistributions: Distribution[];
+    produksiTerbaru: ProductionOrder[];
+    distribusiBerjalan: Distribution[];
 };
 
 const currencyFormatter = new Intl.NumberFormat('id-ID', {
@@ -87,8 +88,8 @@ export default function Dashboard({
     metrics,
     bestsellingProducts,
     lowStockAlerts,
-    recentProductionOrders,
-    activeDistributions,
+    produksiTerbaru,
+    distribusiBerjalan,
 }: DashboardProps) {
     return (
         <>
@@ -388,23 +389,24 @@ export default function Dashboard({
                                 Produksi terbaru
                             </div>
                             <ul className="divide-y divide-sidebar-border/70 dark:divide-sidebar-border">
-                                {recentProductionOrders.length === 0 ? (
+                                {produksiTerbaru.length === 0 ? (
                                     <li className="px-5 py-8 text-center text-sm text-muted-foreground">
                                         Belum ada produksi.
                                     </li>
                                 ) : (
-                                    recentProductionOrders.map((order) => (
+                                    produksiTerbaru.map((order) => (
                                         <li
                                             key={order.id}
                                             className="flex items-center justify-between gap-4 px-5 py-3"
                                         >
                                             <div className="min-w-0">
                                                 <p className="truncate text-sm font-medium">
-                                                    {order.product?.name ??
-                                                        'Produk dihapus'}
+                                                    {order.production_number}
                                                 </p>
                                                 <p className="mt-1 truncate text-xs text-muted-foreground">
-                                                    {order.production_number} -{' '}
+                                                    {order.product?.name ??
+                                                        'Produk dihapus'}{' '}
+                                                    -{' '}
                                                     {formatDate(
                                                         order.production_date,
                                                     )}
@@ -446,47 +448,46 @@ export default function Dashboard({
                                 Distribusi berjalan
                             </div>
                             <ul className="divide-y divide-sidebar-border/70 dark:divide-sidebar-border">
-                                {activeDistributions.length === 0 ? (
+                                {distribusiBerjalan.length === 0 ? (
                                     <li className="px-5 py-8 text-center text-sm text-muted-foreground">
                                         Tidak ada distribusi berjalan.
                                     </li>
                                 ) : (
-                                    activeDistributions.map((distribution) => (
-                                        <li
-                                            key={distribution.id}
-                                            className="flex items-center justify-between gap-4 px-5 py-3"
-                                        >
-                                            <div className="min-w-0">
-                                                <p className="truncate text-sm font-medium">
-                                                    {distribution.branch
-                                                        ?.name ??
-                                                        'Cabang dihapus'}
-                                                </p>
-                                                <p className="mt-1 truncate text-xs text-muted-foreground">
-                                                    {
-                                                        distribution.distribution_number
-                                                    }{' '}
-                                                    -{' '}
-                                                    {formatDate(
-                                                        distribution.distribution_date,
-                                                    )}
-                                                </p>
-                                            </div>
-                                            <Badge
-                                                className="shrink-0"
-                                                variant={
-                                                    distribution.status ===
-                                                    'shipped'
-                                                        ? 'default'
-                                                        : 'secondary'
-                                                }
+                                    distribusiBerjalan.map((distribution) => {
+                                        const statusBadge = getStatusBadge(
+                                            distribution.status,
+                                        );
+
+                                        return (
+                                            <li
+                                                key={distribution.id}
+                                                className="flex items-center justify-between gap-4 px-5 py-3"
                                             >
-                                                {getStatusLabel(
-                                                    distribution.status,
-                                                )}
-                                            </Badge>
-                                        </li>
-                                    ))
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-medium">
+                                                        {distribution.distribution_number}
+                                                    </p>
+                                                    <p className="mt-1 truncate text-xs text-muted-foreground">
+                                                        {distribution.branch
+                                                            ?.name ??
+                                                            'Cabang dihapus'}{' '}
+                                                        -{' '}
+                                                        {formatDate(
+                                                            distribution.distribution_date,
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                <Badge
+                                                    className={`shrink-0 ${statusBadge.className}`}
+                                                    variant={statusBadge.variant}
+                                                >
+                                                    {getStatusLabel(
+                                                        distribution.status,
+                                                    )}
+                                                </Badge>
+                                            </li>
+                                        );
+                                    })
                                 )}
                             </ul>
                         </section>

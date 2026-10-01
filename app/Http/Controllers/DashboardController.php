@@ -57,11 +57,11 @@ class DashboardController extends Controller
                 ->with('product:id,name,unit')
                 ->get(),
             'lowStockAlerts' => $lowStockAlerts,
-            'recentProductionOrders' => ProductionOrder::with('product:id,name,unit')
+            'produksiTerbaru' => ProductionOrder::with('product:id,name,unit')
                 ->latest()
                 ->limit(5)
                 ->get(),
-            'activeDistributions' => Distribution::with('branch:id,name')
+            'distribusiBerjalan' => Distribution::with('branch:id,name')
                 ->whereIn('status', ['pending', 'shipped'])
                 ->latest()
                 ->limit(5)
