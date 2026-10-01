@@ -116,6 +116,16 @@ class DistributionController extends Controller
                 $item->product->stockMovements()->create([
                     'type' => 'out',
                     'quantity' => $item->quantity,
+                    'branch_id' => null,
+                    'reference_type' => 'distribution',
+                    'reference_id' => $distribution->id,
+                    'created_by' => auth()->id(),
+                ]);
+
+                $item->product->stockMovements()->create([
+                    'type' => 'in',
+                    'quantity' => $item->quantity,
+                    'branch_id' => $distribution->branch_id,
                     'reference_type' => 'distribution',
                     'reference_id' => $distribution->id,
                     'created_by' => auth()->id(),

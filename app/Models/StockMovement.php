@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class StockMovement extends Model
 {
     //
-    use hasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'stockable_type',
         'stockable_id',
+        'branch_id',
         'type',
         'quantity',
         'reference_type',
@@ -33,5 +34,10 @@ class StockMovement extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

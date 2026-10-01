@@ -35,8 +35,8 @@ class RawMaterial extends Model
 
     public function getCurrentStockAttribute()
     {
-        $in = $this->stockMovements()->where('type', 'in')->sum('quantity');
-        $out = $this->stockMovements()->where('type', 'out')->sum('quantity');
+        $in = $this->stockMovements()->where('type', 'in')->whereNull('branch_id')->sum('quantity');
+        $out = $this->stockMovements()->where('type', 'out')->whereNull('branch_id')->sum('quantity');
         
         return $in - $out;
     }

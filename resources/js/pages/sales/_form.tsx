@@ -19,7 +19,7 @@ export type ProductOption = {
 	sku: string;
 	price: string | number;
 	unit: string;
-	current_stock: string | number;
+	stock_by_branch: Record<number, number>;
 };
 
 type ItemRow = {
@@ -73,13 +73,25 @@ export default function SaleForm({ branches, products }: SaleFormProps) {
 		(item) => Number(item.quantity || 0) * Number(item.unit_price || 0),
 	);
 	const totalAmount = subtotals.reduce((total, subtotal) => total + subtotal, 0);
+	const hasInsufficientStock =
+		Boolean(header.branch_id) &&
+		products.some((product) => {
+			const requestedQuantity = items
+				.filter((item) => item.product_id === product.id)
+				.reduce((total, item) => total + Number(item.quantity || 0), 0);
+
+			return (
+				requestedQuantity >
+				Number(product.stock_by_branch[header.branch_id as number] ?? 0)
+			);
+		});
 	const hasInvalidItems = items.some(
 		(item) =>
 			!item.product_id ||
 			Number(item.quantity) <= 0 ||
 			item.unit_price === '' ||
 			Number(item.unit_price) < 0,
-	);
+	) || hasInsufficientStock;
 	const hasInvalidHeader = !header.branch_id || !header.sale_date;
 
 	function updateHeader(field: keyof HeaderState, value: string) {
@@ -225,6 +237,34 @@ export default function SaleForm({ branches, products }: SaleFormProps) {
 												const selectedProduct = products.find(
 													(product) => product.id === item.product_id,
 												);
+												const branchStock =
+													selectedProduct && header.branch_id
+														? Number(
+															selectedProduct.stock_by_branch[
+																header.branch_id
+															] ?? 0,
+														)
+														: null;
+												const requestedByOtherRows = selectedProduct
+													? items.reduce(
+															(total, row, rowIndex) =>
+															rowIndex !== itemIndex &&
+															row.product_id === selectedProduct.id
+																? total + Number(row.quantity || 0)
+																: total,
+															0,
+														)
+													: 0;
+											const availableForRow =
+												branchStock === null
+													? null
+													: Math.max(
+															0,
+															branchStock - requestedByOtherRows,
+														);
+											const exceedsAvailableStock =
+												availableForRow !== null &&
+												Number(item.quantity || 0) > availableForRow;
 
 												return (
 													<tr key={itemIndex}>
@@ -249,18 +289,15 @@ export default function SaleForm({ branches, products }: SaleFormProps) {
 																		key={product.id}
 																		value={product.id}
 																	>
-																		{product.name} ({product.sku})
+																			{product.name} ({product.sku})
+																			{header.branch_id !== '' &&
+																				` · Stok: ${formatQuantity(Number(product.stock_by_branch[header.branch_id] ?? 0))} ${product.unit}`}
 																	</option>
 																))}
 															</select>
-															{selectedProduct && (
+															{selectedProduct && branchStock !== null && (
 																<p className="mt-1 text-xs text-muted-foreground">
-																	Stok tersedia:{' '}
-																	{formatQuantity(
-																		Number(
-																			selectedProduct.current_stock,
-																		),
-																	)}{' '}
+																	Stok cabang: {formatQuantity(branchStock)}{' '}
 																	{selectedProduct.unit}
 																</p>
 															)}
@@ -273,6 +310,7 @@ export default function SaleForm({ branches, products }: SaleFormProps) {
 														<td className="px-4 py-3 align-top">
 															<div className="flex items-center gap-2">
 																<Input
+																max={availableForRow ?? undefined}
 																	min="0.001"
 																	step="0.001"
 																	type="number"
@@ -295,6 +333,18 @@ export default function SaleForm({ branches, products }: SaleFormProps) {
 																	`items.${itemIndex}.quantity`,
 																)}
 															/>
+															{availableForRow !== null && (
+																<p className="mt-1 text-xs text-muted-foreground">
+																	Maks. tersedia untuk baris ini:{' '}
+																	{formatQuantity(availableForRow)}{' '}
+																	{selectedProduct?.unit}
+																</p>
+															)}
+															{exceedsAvailableStock && (
+																<p className="mt-1 text-xs text-destructive">
+																	Jumlah melebihi stok cabang yang tersedia.
+																</p>
+															)}
 														</td>
 														<td className="px-4 py-3 align-top">
 															<Input

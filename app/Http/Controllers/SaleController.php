@@ -31,21 +31,27 @@ class SaleController extends Controller
      */
     public function create(): Response
     {
-        $products = Product::query()
-            ->withSum(['stockMovements as stock_in' => fn ($query) => $query->where('type', 'in')], 'quantity')
-            ->withSum(['stockMovements as stock_out' => fn ($query) => $query->where('type', 'out')], 'quantity')
-            ->get(['id', 'name', 'sku', 'price', 'unit'])
-            ->map(fn (Product $product) => [
+        $branches = Branch::all(['id', 'name']);
+        $products = Product::all(['id', 'name', 'sku', 'price', 'unit'])
+            ->map(function (Product $product) use ($branches) {
+                $stockByBranch = [];
+
+                foreach ($branches as $branch) {
+                    $stockByBranch[$branch->id] = $product->currentStockAtBranch($branch->id);
+                }
+
+                return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'sku' => $product->sku,
                 'price' => $product->price,
                 'unit' => $product->unit,
-                'current_stock' => (float) ($product->stock_in ?? 0) - (float) ($product->stock_out ?? 0),
-            ]);
+                    'stock_by_branch' => $stockByBranch,
+                ];
+            });
 
         return Inertia::render('sales/create', [
-            'branches' => Branch::all(['id', 'name']),
+            'branches' => $branches,
             'products' => $products,
         ]);
     }
@@ -64,7 +70,36 @@ class SaleController extends Controller
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
         ]);
 
-        DB::transaction(function () use ($validated, $request) {
+        $products = Product::whereIn(
+            'id',
+            collect($validated['items'])->pluck('product_id')->unique(),
+        )->get()->keyBy('id');
+
+        $insufficientItems = [];
+        $requestedByProduct = collect($validated['items'])->groupBy('product_id');
+
+        foreach ($requestedByProduct as $productId => $items) {
+            $product = $products->get($productId);
+            $requestedQuantity = $items->sum('quantity');
+            $availableQuantity = $product->currentStockAtBranch($validated['branch_id']);
+
+            if ($availableQuantity < $requestedQuantity) {
+                $insufficientItems[] = sprintf(
+                    '%s (butuh %s, tersedia %s di cabang ini)',
+                    $product->name,
+                    $requestedQuantity,
+                    $availableQuantity,
+                );
+            }
+        }
+
+        if (! empty($insufficientItems)) {
+            return redirect()->back()->withErrors([
+                'stock' => 'Stok produk di cabang tidak mencukupi: ' . implode(', ', $insufficientItems),
+            ]);
+        }
+
+        DB::transaction(function () use ($validated, $request, $products) {
             $totalAmount = collect($validated['items'])
                 ->sum(fn ($item) => $item['quantity'] * $item['unit_price']);
 
@@ -83,10 +118,19 @@ class SaleController extends Controller
                     'unit_price' => $item['unit_price'],
                     'subtotal' => $item['quantity'] * $item['unit_price'],
                 ]);
+
+                $products->get($item['product_id'])->stockMovements()->create([
+                    'type' => 'out',
+                    'quantity' => $item['quantity'],
+                    'branch_id' => $validated['branch_id'],
+                    'reference_type' => 'sale',
+                    'reference_id' => $sale->id,
+                    'created_by' => $request->user()->id,
+                ]);
             }
         });
 
-        return to_route('sales.index')->with('success', 'Transaksi penjualan berhasil disimpan.');
+        return to_route('sales.index')->with('success', 'Transaksi berhasil dicatat dan stok cabang telah diperbarui.');
     }
 
     private function generateSaleNumber(): string

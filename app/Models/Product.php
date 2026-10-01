@@ -40,9 +40,17 @@ class Product extends Model
 
     public function getCurrentStockAttribute()
     {
-        $in = $this->stockMovements()->where('type', 'in')->sum('quantity');
-        $out = $this->stockMovements()->where('type', 'out')->sum('quantity');
+        $in = $this->stockMovements()->where('type', 'in')->whereNull('branch_id')->sum('quantity');
+        $out = $this->stockMovements()->where('type', 'out')->whereNull('branch_id')->sum('quantity');
         
+        return $in - $out;
+    }
+
+    public function currentStockAtBranch($branchId)
+    {
+        $in = $this->stockMovements()->where('type', 'in')->where('branch_id', $branchId)->sum('quantity');
+        $out = $this->stockMovements()->where('type', 'out')->where('branch_id', $branchId)->sum('quantity');
+
         return $in - $out;
     }
 }
