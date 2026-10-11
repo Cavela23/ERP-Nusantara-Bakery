@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class SaleController extends Controller
     public function create(): Response
     {
         $branches = Branch::all(['id', 'name']);
-        $products = Product::all(['id', 'name', 'sku', 'price', 'unit'])
+        $products = Product::all(['id', 'name', 'sku', 'price', 'unit', 'category_id'])
             ->map(function (Product $product) use ($branches) {
                 $stockByBranch = [];
 
@@ -41,11 +42,12 @@ class SaleController extends Controller
                 }
 
                 return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'sku' => $product->sku,
-                'price' => $product->price,
-                'unit' => $product->unit,
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'sku' => $product->sku,
+                    'price' => $product->price,
+                    'unit' => $product->unit,
+                    'category_id' => $product->category_id,
                     'stock_by_branch' => $stockByBranch,
                 ];
             });
@@ -53,6 +55,7 @@ class SaleController extends Controller
         return Inertia::render('sales/create', [
             'branches' => $branches,
             'products' => $products,
+            'categories' => Category::all(['id', 'name']),
         ]);
     }
 
