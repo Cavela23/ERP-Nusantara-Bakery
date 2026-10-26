@@ -14,7 +14,7 @@ use App\Http\Controllers\ProductionOrderController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\SaleController;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::redirect('/', '/login')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
