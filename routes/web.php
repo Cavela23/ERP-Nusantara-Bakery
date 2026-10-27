@@ -13,6 +13,7 @@ use App\Http\Controllers\BillOfMaterialController;
 use App\Http\Controllers\ProductionOrderController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\UserController;
 
 Route::redirect('/', '/login')->name('home');
 
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::middleware('role:owner')->group(function () {
+        Route::resource('users', UserController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('suppliers', SuppliersController::class)->except(['show']);

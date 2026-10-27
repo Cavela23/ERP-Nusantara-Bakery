@@ -9,7 +9,9 @@ import {
     ShoppingCart,
     Truck,
     BookOpen,
+    Users,
 } from 'lucide-react';
+import { usePage } from '@inertiajs/react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -120,6 +122,17 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
+    const { auth } = usePage().props as {
+        auth: { user: { roles?: { name: string }[] } | null };
+    };
+    const canManageUsers = auth.user?.roles?.some((role) => role.name === 'owner');
+    const navigationItems = canManageUsers
+        ? [
+              ...mainNavItems,
+              { title: 'Manajemen User', href: '/users', icon: Users },
+          ]
+        : mainNavItems;
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -135,7 +148,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={navigationItems} />
             </SidebarContent>
 
             <SidebarFooter>

@@ -13,11 +13,7 @@ class DashboardDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::where('email', 'test@example.com')->first()
-            ?? User::factory()->create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-            ]);
+        $user = User::query()->role('owner')->firstOrFail();
         $product = Product::query()->orderBy('id')->first()
             ?? Product::factory()->create();
         $branch = Branch::firstOrCreate(
