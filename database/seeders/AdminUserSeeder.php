@@ -17,7 +17,7 @@ class AdminUserSeeder extends Seeder
         }
 
         $admin = User::updateOrCreate(
-            ['email' => env('ADMIN_EMAIL', 'admin@example.com')],
+            ['email' => env('ADMIN_EMAIL', 'fauziannrachman@gmail.com')],
             [
                 'name' => env('ADMIN_NAME', 'Administrator'),
                 'password' => $password,
