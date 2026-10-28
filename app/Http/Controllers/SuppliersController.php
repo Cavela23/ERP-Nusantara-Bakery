@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supplier;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class SuppliersController extends Controller
 {
@@ -34,7 +32,7 @@ class SuppliersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         //
         $validated = $request->validate([
@@ -44,6 +42,10 @@ class SuppliersController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string'],
         ]);
+
+        Supplier::create($validated);
+
+        return to_route('suppliers.index')->with('success', 'Supplier berhasil ditambahkan.');
     }
 
     /**
@@ -68,7 +70,7 @@ class SuppliersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): RedirectResponse
     {
         //
         $supplier = Supplier::findOrFail($id);
@@ -79,15 +81,21 @@ class SuppliersController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string'],
         ]);
+
+        $supplier->update($validated);
+
+        return to_route('suppliers.index')->with('success', 'Supplier berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): RedirectResponse
     {
         //
         $supplier = Supplier::findOrFail($id);
         $supplier->delete();
+
+        return to_route('suppliers.index')->with('success', 'Supplier berhasil dihapus.');
     }
 }
