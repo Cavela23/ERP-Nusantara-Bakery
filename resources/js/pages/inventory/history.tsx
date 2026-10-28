@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { formatQuantity } from '@/lib/utils';
 import { index } from '@/routes/inventory';
 
 type Stockable = {
@@ -152,7 +153,9 @@ export default function InventoryHistory({ movements }: InventoryHistoryProps) {
                                                     </Badge>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    {movement.quantity}
+                                                    {formatQuantity(
+                                                        movement.quantity,
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {movement.reference_type ??

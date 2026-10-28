@@ -10,3 +10,12 @@ export function cn(...inputs: ClassValue[]) {
 export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
     return typeof url === 'string' ? url : url.url;
 }
+
+const quantityFormatter = new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3,
+});
+
+export function formatQuantity(value: number | string): string {
+    return quantityFormatter.format(Number(value));
+}

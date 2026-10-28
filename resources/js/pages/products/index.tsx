@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { formatQuantity } from '@/lib/utils';
 import { create, destroy, edit, index } from '@/routes/products';
 
 type Category = {
@@ -45,9 +46,7 @@ const currencyFormatter = new Intl.NumberFormat('id-ID', {
     maximumFractionDigits: 2,
 });
 
-export default function ProductsIndex({
-    products,
-}: ProductsIndexProps) {
+export default function ProductsIndex({ products }: ProductsIndexProps) {
     function handleDelete(product: Product) {
         if (!window.confirm(`Hapus produk "${product.name}"?`)) {
             return;
@@ -81,14 +80,26 @@ export default function ProductsIndex({
                 <Card className="overflow-hidden border-sidebar-border/70 py-0 dark:border-sidebar-border">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="border-b border-sidebar-border/70 bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground dark:border-sidebar-border">
+                            <thead className="border-b border-sidebar-border/70 bg-muted/40 text-xs tracking-wide text-muted-foreground uppercase dark:border-sidebar-border">
                                 <tr>
-                                    <th className="px-6 py-4 font-medium">Nama</th>
-                                    <th className="px-6 py-4 font-medium">Kategori</th>
-                                    <th className="px-6 py-4 font-medium">SKU</th>
-                                    <th className="px-6 py-4 text-right font-medium">Harga</th>
-                                    <th className="px-6 py-4 text-right font-medium">Stok Min</th>
-                                    <th className="px-6 py-4 text-right font-medium">Aksi</th>
+                                    <th className="px-6 py-4 font-medium">
+                                        Nama
+                                    </th>
+                                    <th className="px-6 py-4 font-medium">
+                                        Kategori
+                                    </th>
+                                    <th className="px-6 py-4 font-medium">
+                                        SKU
+                                    </th>
+                                    <th className="px-6 py-4 text-right font-medium">
+                                        Harga
+                                    </th>
+                                    <th className="px-6 py-4 text-right font-medium">
+                                        Stok Min
+                                    </th>
+                                    <th className="px-6 py-4 text-right font-medium">
+                                        Aksi
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sidebar-border/70 dark:divide-sidebar-border">
@@ -124,19 +135,34 @@ export default function ProductsIndex({
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                {product.stock_min} {product.unit}
+                                                {formatQuantity(
+                                                    product.stock_min,
+                                                )}{' '}
+                                                {product.unit}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex justify-end gap-2">
-                                                    <Button asChild size="sm" variant="outline">
-                                                        <Link href={edit(product.id)}>
+                                                    <Button
+                                                        asChild
+                                                        size="sm"
+                                                        variant="outline"
+                                                    >
+                                                        <Link
+                                                            href={edit(
+                                                                product.id,
+                                                            )}
+                                                        >
                                                             Edit
                                                         </Link>
                                                     </Button>
                                                     <Button
                                                         size="sm"
                                                         variant="destructive"
-                                                        onClick={() => handleDelete(product)}
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                product,
+                                                            )
+                                                        }
                                                     >
                                                         Hapus
                                                     </Button>

@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { formatQuantity } from '@/lib/utils';
 import { history, index } from '@/routes/inventory';
 
 type StockItem = {
@@ -85,10 +86,12 @@ function StockTable({ items }: { items: StockItem[] }) {
                                         {item.sku}
                                     </td>
                                     <td className="px-6 py-4">
-                                        {item.current_stock} {item.unit}
+                                        {formatQuantity(item.current_stock)}{' '}
+                                        {item.unit}
                                     </td>
                                     <td className="px-6 py-4">
-                                        {item.stock_min} {item.unit}
+                                        {formatQuantity(item.stock_min)}{' '}
+                                        {item.unit}
                                     </td>
                                     <td className="px-6 py-4">
                                         <Badge
