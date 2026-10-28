@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -73,6 +73,15 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
 export default function PurchasingIndex({
     purchaseOrders,
 }: PurchasingIndexProps) {
+    const { auth } = usePage().props as {
+        auth: { user: { roles?: { name: string }[] } | null };
+    };
+    const roles = auth.user?.roles?.map((role) => role.name) ?? [];
+    const canManagePurchases =
+        roles.includes('owner') || roles.includes('purchasing_staff');
+    const canReceivePurchases =
+        roles.includes('owner') || roles.includes('staff_gudang');
+
     function handleDelete(purchaseOrder: PurchaseOrder) {
         if (purchaseOrder.status === 'received') {
             return;
@@ -134,9 +143,11 @@ export default function PurchasingIndex({
                         </p>
                     </div>
 
-                    <Button asChild>
-                        <Link href={create()}>Buat PO</Link>
-                    </Button>
+                    {canManagePurchases && (
+                        <Button asChild>
+                            <Link href={create()}>Buat PO</Link>
+                        </Button>
+                    )}
                 </div>
 
                 <Card className="overflow-hidden border-sidebar-border/70 py-0 dark:border-sidebar-border">
@@ -229,60 +240,66 @@ export default function PurchasingIndex({
                                                             </span>
                                                         ) : (
                                                             <>
-                                                                {purchaseOrder.status ===
-                                                                    'draft' && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="secondary"
-                                                                        onClick={() =>
-                                                                            handleMarkAsOrdered(
-                                                                                purchaseOrder,
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        Tandai
-                                                                        Dipesan
-                                                                    </Button>
+                                                                {canManagePurchases &&
+                                                                    purchaseOrder.status ===
+                                                                        'draft' && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="secondary"
+                                                                            onClick={() =>
+                                                                                handleMarkAsOrdered(
+                                                                                    purchaseOrder,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Tandai
+                                                                            Dipesan
+                                                                        </Button>
+                                                                    )}
+                                                                {canReceivePurchases &&
+                                                                    purchaseOrder.status ===
+                                                                        'ordered' && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="default"
+                                                                            onClick={() =>
+                                                                                handleReceive(
+                                                                                    purchaseOrder,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Terima
+                                                                            Barang
+                                                                        </Button>
+                                                                    )}
+                                                                {canManagePurchases && (
+                                                                    <>
+                                                                        <Button
+                                                                            asChild
+                                                                            size="sm"
+                                                                            variant="outline"
+                                                                        >
+                                                                            <Link
+                                                                                href={edit(
+                                                                                    purchaseOrder.id,
+                                                                                )}
+                                                                            >
+                                                                                Edit
+                                                                            </Link>
+                                                                        </Button>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="destructive"
+                                                                            onClick={() =>
+                                                                                handleDelete(
+                                                                                    purchaseOrder,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Hapus
+                                                                        </Button>
+                                                                    </>
                                                                 )}
-                                                                {purchaseOrder.status ===
-                                                                    'ordered' && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="default"
-                                                                        onClick={() =>
-                                                                            handleReceive(
-                                                                                purchaseOrder,
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        Terima
-                                                                        Barang
-                                                                    </Button>
-                                                                )}
-                                                                <Button
-                                                                    asChild
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                >
-                                                                    <Link
-                                                                        href={edit(
-                                                                            purchaseOrder.id,
-                                                                        )}
-                                                                    >
-                                                                        Edit
-                                                                    </Link>
-                                                                </Button>
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="destructive"
-                                                                    onClick={() =>
-                                                                        handleDelete(
-                                                                            purchaseOrder,
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    Hapus
-                                                                </Button>
                                                             </>
                                                         )}
                                                     </div>

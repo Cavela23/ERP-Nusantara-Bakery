@@ -34,9 +34,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->parameters(['bill-of-materials' => 'product']);
     });
 
+    Route::middleware('role:purchasing_staff|staff_gudang|owner')->group(function () {
+        Route::get('purchasing', [PurchaseOrderController::class, 'index'])->name('purchasing.index');
+    });
+
     Route::middleware('role:purchasing_staff|owner')->group(function () {
         Route::resource('purchasing', PurchaseOrderController::class)
-            ->except(['show'])
+            ->only(['create', 'store', 'edit', 'update', 'destroy'])
             ->parameters(['purchasing' => 'purchaseOrder']);
         Route::post('purchasing/{purchaseOrder}/mark-as-ordered', [PurchaseOrderController::class, 'markAsOrdered'])
             ->name('purchasing.mark-as-ordered');

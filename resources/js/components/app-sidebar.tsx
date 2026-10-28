@@ -125,13 +125,56 @@ export function AppSidebar() {
     const { auth } = usePage().props as {
         auth: { user: { roles?: { name: string }[] } | null };
     };
-    const canManageUsers = auth.user?.roles?.some((role) => role.name === 'owner');
-    const navigationItems = canManageUsers
-        ? [
-              ...mainNavItems,
-              { title: 'Manajemen User', href: '/users', icon: Users },
-          ]
-        : mainNavItems;
+    const roles = auth.user?.roles?.map((role) => role.name) ?? [];
+    const isOwner = roles.includes('owner');
+    const canPurchase = isOwner || roles.includes('purchasing_staff');
+    const canReceivePurchases = isOwner || roles.includes('staff_gudang');
+    const canManageInventory = isOwner || roles.includes('staff_gudang');
+    const canManageProduction = isOwner || roles.includes('kepala_produksi');
+    const canSell = isOwner || roles.includes('kasir');
+    const navigationItems = mainNavItems
+        .map((item) => {
+            if (item.title === 'Master Data' || item.title === 'Reporting') {
+                return isOwner ? item : null;
+            }
+
+            if (item.title === 'Purchasing') {
+                return canPurchase || canReceivePurchases ? item : null;
+            }
+
+            if (item.title === 'Inventory' || item.title === 'Distribution') {
+                return canManageInventory ? item : null;
+            }
+
+            if (item.title === 'Production') {
+                if (!canManageProduction) {
+                    return null;
+                }
+
+                return isOwner
+                    ? item
+                    : {
+                          ...item,
+                          items: item.items?.filter(
+                              (child) => child.title !== 'Bill of Materials',
+                          ),
+                      };
+            }
+
+            if (item.title === 'POS') {
+                return canSell ? item : null;
+            }
+
+            return item;
+        })
+        .filter((item): item is NavItem => item !== null);
+    if (isOwner) {
+        navigationItems.push({
+            title: 'Manajemen User',
+            href: '/users',
+            icon: Users,
+        });
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">
